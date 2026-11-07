@@ -6,17 +6,14 @@ def main(page: ft.Page):
     page.horizontal_alignment = "center"
     page.theme_mode = ft.ThemeMode.DARK
 
-    # State variables
-    game_stage = [1]  # 1: Starlight mission, 2: Moonlight fix, 3: Launch emergency
+    game_stage = [1]  
     click_count = [0]
 
-    # UI Header Elements
     title_text = ft.Text("🚨 MISSION CONTROL: CRISIS ACTIVE", size=22, weight=ft.FontWeight.BOLD, color="red_accent")
     subtitle_text = ft.Text("Astronaut Maya: 'Mission Control! Solar glare has blinded our sensors!'", size=14, color="white70")
     
     instruction_text = ft.Text("📋 TASK 1: Type 'starlight' to activate Solar Filter Mode.", size=14, color="yellow", weight=ft.FontWeight.BOLD)
 
-    # Input Field
     user_input = ft.TextField(
         label="Enter Command Code...",
         width=380,
@@ -24,7 +21,6 @@ def main(page: ft.Page):
         border_color="cyan"
     )
 
-    # Status Display Card
     output_card = ft.Container(
         content=ft.Text("Status: Waiting for Mission Control response...", size=15, color="white"),
         padding=15,
@@ -33,14 +29,11 @@ def main(page: ft.Page):
         width=380
     )
 
-    # Forward declaration for the button
     action_button = ft.FilledButton(content="Transmit Code")
 
-    # Command Logic
     def handle_submit(e):
         val = user_input.value.strip().lower()
 
-        # TASK 1: Starlight Mode
         if game_stage[0] == 1:
             if val == "starlight":
                 game_stage[0] = 2
@@ -55,7 +48,6 @@ def main(page: ft.Page):
                 output_card.bgcolor = "blue_grey_900"
                 output_card.content = ft.Text(f"❌ Invalid Code '{val}'. You must type 'starlight'!", size=15, color="red_accent")
 
-        # TASK 2: Moonlight Fix
         elif game_stage[0] == 2:
             if val == "moonlight":
                 game_stage[0] = 3
@@ -73,9 +65,7 @@ def main(page: ft.Page):
         user_input.value = ""
         page.update()
 
-    # Launch Logic (Task 3 & Space Rescue)
     def handle_button_click(e):
-        # Stage 1 and 2 require typing text
         if game_stage[0] in [1, 2]:
             if user_input.value.strip() != "":
                 handle_submit(e)
@@ -84,7 +74,6 @@ def main(page: ft.Page):
                 page.update()
             return
 
-        # Stage 3: Launch Thrusters sequence
         if game_stage[0] == 3:
             click_count[0] += 1
             if click_count[0] == 1:
@@ -104,7 +93,6 @@ def main(page: ft.Page):
             page.update()
             return
 
-        # Stage 4: Reset Game back to start
         if game_stage[0] == 4:
             game_stage[0] = 1
             click_count[0] = 0
@@ -120,7 +108,6 @@ def main(page: ft.Page):
 
     action_button.on_click = handle_button_click
 
-    # Render Layout
     page.add(
         title_text,
         subtitle_text,
