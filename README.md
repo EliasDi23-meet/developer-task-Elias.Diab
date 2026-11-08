@@ -9,4 +9,6 @@ Welcome to **Space Station Bravo - Crisis Control**, an interactive narrative te
 - **Interactive Terminal Commands:** Validate secret codes (`starlight`, `moonlight`) through a styled text input field.
 - **Multi-Click Launch Sequence:** Charge station thrusters through consecutive button clicks to blast off into space.
 
-
+### How to run code:
+I run the code by typing :" python3 mainpy"
+i didnt use anything extra
