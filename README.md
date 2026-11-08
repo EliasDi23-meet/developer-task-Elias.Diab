@@ -10,5 +10,5 @@ Welcome to **Space Station Bravo - Crisis Control**, an interactive narrative te
 - **Multi-Click Launch Sequence:** Charge station thrusters through consecutive button clicks to blast off into space.
 
 ### How to run code:
-I run the code by typing :" python3 mainpy"
+I run the code by typing :" python3 main.py"
 i didnt use anything extra
