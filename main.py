@@ -1,123 +1,130 @@
 import flet as ft
 
 def main(page: ft.Page):
-    page.title = "Space Station Bravo - Crisis Control"
+    page.title = "Input Display App"
     page.vertical_alignment = "center"
     page.horizontal_alignment = "center"
     page.theme_mode = ft.ThemeMode.DARK
 
-    game_stage = [1]  
+    found_starlight = [False]
+    found_moonlight = [False]
+    found_warp = [False]
     click_count = [0]
+    game_completed = [False]
 
-    title_text = ft.Text("🚨 MISSION CONTROL: CRISIS ACTIVE", size=22, weight=ft.FontWeight.BOLD, color="red_accent")
-    subtitle_text = ft.Text("Astronaut Maya: 'Mission Control! Solar glare has blinded our sensors!'", size=14, color="white70")
-    
-    instruction_text = ft.Text("📋 TASK 1: Type 'starlight' to activate Solar Filter Mode.", size=14, color="yellow", weight=ft.FontWeight.BOLD)
+    title_text = ft.Text("Input Display App", size=24, weight=ft.FontWeight.BOLD, color="cyan")
+    hint_text = ft.Text("💡 Hint: Secrets must be unlocked in order! (Try special words first, then empty clicks)", size=12, color="white54", italic=True)
 
     user_input = ft.TextField(
-        label="Enter Command Code...",
-        width=380,
-        autofocus=True,
-        border_color="cyan"
+        label="Type something here...", 
+        width=320,
+        autofocus=True
     )
 
-    output_card = ft.Container(
-        content=ft.Text("Status: Waiting for Mission Control response...", size=15, color="white"),
-        padding=15,
-        border_radius=10,
-        bgcolor="blue_grey_900",
-        width=380
+    output_text = ft.Text(
+        value="Your input will appear here!", 
+        size=16, 
+        weight=ft.FontWeight.BOLD
     )
 
-    action_button = ft.FilledButton(content="Transmit Code")
+    secret_status = ft.Text("Secret Mini-Game Progress: 0 / 3 discovered", size=13, color="yellow")
+    reset_button = ft.OutlinedButton(content="Reset Secret Game", visible=False)
+
+    def check_completion():
+        count = sum([found_starlight[0], found_moonlight[0], found_warp[0]])
+        secret_status.value = f"Secret Mini-Game Progress: {count} / 3 discovered"
+        
+        if count == 3 and not game_completed[0]:
+            game_completed[0] = True
+            output_text.value = "🎉 CONGRATULATIONS! You unlocked all 3 secrets in perfect sequence!"
+            reset_button.visible = True
+        elif count < 3:
+            reset_button.visible = False
 
     def handle_submit(e):
         val = user_input.value.strip().lower()
 
-        if game_stage[0] == 1:
-            if val == "starlight":
-                game_stage[0] = 2
+        if val == "starlight":
+            if not found_starlight[0]:
+                found_starlight[0] = True
+                output_text.value = "✨ SECRET PART 1/3 UNLOCKED: 'starlight' activated Solar Mode! Next hint: Try 'moonlight'."
                 page.theme_mode = ft.ThemeMode.LIGHT
-                title_text.value = "☀️ SOLAR FILTER ACTIVE"
-                title_text.color = "amber_800"
-                subtitle_text.value = "Astronaut Maya: 'Sensors cleared! Now cool down the core!'"
-                instruction_text.value = "📋 TASK 2: Type 'moonlight' to trigger the lunar shield."
-                output_card.bgcolor = "amber_100"
-                output_card.content = ft.Text("✨ Solar filters engaged! Core thermal levels critical.", size=15, color="amber_900")
             else:
-                output_card.bgcolor = "blue_grey_900"
-                output_card.content = ft.Text(f"❌ Invalid Code '{val}'. You must type 'starlight'!", size=15, color="red_accent")
+                output_text.value = "You already unlocked starlight mode!"
 
-        elif game_stage[0] == 2:
-            if val == "moonlight":
-                game_stage[0] = 3
+        elif val == "moonlight":
+            if not found_starlight[0]:
+                output_text.value = "⚠️ Locked! You must unlock 'starlight' before you can use 'moonlight'."
+            elif not found_moonlight[0]:
+                found_moonlight[0] = True
+                output_text.value = "🌙 SECRET PART 2/3 UNLOCKED: 'moonlight' triggered a lunar eclipse! Next hint: Clear the input and click 3 times."
                 page.theme_mode = ft.ThemeMode.DARK
-                title_text.value = "⚠️ SYSTEM FAILURE AT STATION"
-                title_text.color = "orange_accent"
-                subtitle_text.value = "Astronaut Maya: 'The station thrusters failed! You must come up here!'"
-                instruction_text.value = "📋 TASK 3: Clear the input box and click the button 3 times to launch!"
-                output_card.bgcolor = "blue_grey_900"
-                output_card.content = ft.Text("🌙 Lunar shield active! Mission Control shuttle required on-site.", size=15, color="cyan")
             else:
-                output_card.bgcolor = "amber_100"
-                output_card.content = ft.Text(f"❌ Invalid Code '{val}'. You must type 'moonlight'!", size=15, color="red_900")
+                output_text.value = "You already unlocked moonlight mode!"
+
+        elif val != "":
+            output_text.value = f"You typed: {user_input.value}"
+        else:
+            output_text.value = "Please type something first!"
 
         user_input.value = ""
+        check_completion()
         page.update()
 
     def handle_button_click(e):
-        if game_stage[0] in [1, 2]:
-            if user_input.value.strip() != "":
-                handle_submit(e)
-            else:
-                output_card.content = ft.Text("⚠️ Enter the requested code into the box first!", size=15, color="red_accent")
+        if user_input.value.strip() != "":
+            handle_submit(e)
+        else:
+            if not found_starlight[0] or not found_moonlight[0]:
+                output_text.value = "⚠️ Multi-click warp sequence is locked! Find the text code secrets first."
                 page.update()
-            return
+                return
 
-        if game_stage[0] == 3:
-            click_count[0] += 1
-            if click_count[0] == 1:
-                output_card.content = ft.Text("🔴 Thrusters Charging... (Click 2 more times)", size=15, color="orange")
-            elif click_count[0] == 2:
-                output_card.content = ft.Text("🟡 Launch Warning: 5 Seconds... (Click 1 more time)", size=15, color="yellow")
-            elif click_count[0] >= 3:
-                game_stage[0] = 4
-                user_input.visible = False
-                action_button.content = "Mission Accomplished (Reset Game)"
-                title_text.value = "🚀 MISSION CONTROL HAS ARRIVED IN SPACE!"
-                title_text.color = "green_accent"
-                subtitle_text.value = "Astronaut Maya: 'You made it! Station Bravo is saved!'"
-                instruction_text.value = "🎉 HERO OF THE MISSION!"
-                output_card.bgcolor = "indigo_900"
-                output_card.content = ft.Text("✨ You docked with Station Bravo and repaired the station!", size=16, color="white", weight=ft.FontWeight.BOLD)
-            page.update()
-            return
+            if not found_warp[0]:
+                click_count[0] += 1
+                if click_count[0] == 1:
+                    output_text.value = "🔍 System notice: Empty transmission detected... (Click 2 more times)"
+                elif click_count[0] == 2:
+                    output_text.value = "🔍 System notice: Signal amplifying... (Click 1 more time)"
+                elif click_count[0] >= 3:
+                    found_warp[0] = True
+                    output_text.value = "🚀 SECRET PART 3/3 UNLOCKED: Multi-click warp sequence completed!"
+                check_completion()
+                page.update()
+            else:
+                output_text.value = "All secrets unlocked! Type something normally."
+                page.update()
 
-        if game_stage[0] == 4:
-            game_stage[0] = 1
-            click_count[0] = 0
-            user_input.visible = True
-            action_button.content = "Transmit Code"
-            title_text.value = "🚨 MISSION CONTROL: CRISIS ACTIVE"
-            title_text.color = "red_accent"
-            subtitle_text.value = "Astronaut Maya: 'Mission Control! Solar glare has blinded our sensors!'"
-            instruction_text.value = "📋 TASK 1: Type 'starlight' to activate Solar Filter Mode."
-            output_card.bgcolor = "blue_grey_900"
-            output_card.content = ft.Text("Status: Waiting for Mission Control response...", size=15, color="white")
-            page.update()
+    def reset_secrets(e):
+        found_starlight[0] = False
+        found_moonlight[0] = False
+        found_warp[0] = False
+        click_count[0] = 0
+        game_completed[0] = False
+        page.theme_mode = ft.ThemeMode.DARK
+        output_text.value = "Secret game reset. Back to normal inputs!"
+        secret_status.value = "Secret Mini-Game Progress: 0 / 3 discovered"
+        reset_button.visible = False
+        page.update()
 
-    action_button.on_click = handle_button_click
+    reset_button.on_click = reset_secrets
+
+    submit_button = ft.FilledButton(
+        content="Display Input", 
+        on_click=handle_button_click
+    )
 
     page.add(
         title_text,
-        subtitle_text,
+        hint_text,
         ft.Divider(height=10, color="transparent"),
-        instruction_text,
-        ft.Divider(height=15, color="transparent"),
         user_input,
-        action_button,
+        submit_button,
+        ft.Divider(height=10, color="transparent"),
+        output_text,
         ft.Divider(height=15, color="transparent"),
-        output_card
+        secret_status,
+        reset_button
     )
 
 ft.run(main)
